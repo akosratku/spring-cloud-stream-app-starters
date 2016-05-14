@@ -14,7 +14,7 @@ import org.springframework.util.StringUtils;
  */
 public class UpdateQueryColumnNameExtractor implements ColumnNameExtractor {
 
-	private static final Pattern PATTERN = Pattern.compile("(?<=set)(.*)(?=where)where(.*)");
+	private static final Pattern PATTERN = Pattern.compile("(?i)(?<=set)(.*)(?=where)where(.*)");
 	
 	@Override
 	public List<String> extract(String query) {
