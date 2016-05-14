@@ -123,35 +123,68 @@ public abstract class CassandraSinkIntegrationTests {
 	}
 
 	@WebIntegrationTest(randomPort = true, value = {"spring.cassandra.init-script=init-db.cql",
-			"ingest-query=insert into book (isbn, title, author, pages, saleDate, inStock) values (?, ?, ?, ?, ?, ?)"})
+	"ingest-query=insert into book (isbn, title, author, pages, saleDate, inStock) values (?, ?, ?, ?, ?, ?)"})
 	@Ignore("Ignoring temporarily until the CI failure root cause is resolved")
-	public static class CassandraSinkIngestTests extends CassandraSinkIntegrationTests {
-
-		@Test
-		public void testIngestQuery() throws Exception {
-			List<Book> books = getBookList(5);
-
-			ObjectMapper objectMapper = new ObjectMapper();
-			objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-			Jackson2JsonObjectMapper mapper = new Jackson2JsonObjectMapper(objectMapper);
-
-			this.sink.input().send(new GenericMessage<>(mapper.toJson(books)));
-
-			final Select select = QueryBuilder.select().all().from("book");
-
-			assertEqualsEventually(5, new Supplier<Integer>() {
-
-				@Override
-				public Integer get() {
-					return cassandraTemplate.select(select, Book.class).size();
-				}
-
-			});
-
-			this.cassandraTemplate.truncate("book");
-		}
-
+	public static class CassandraSinkIngestInsertTests extends CassandraSinkIntegrationTests {
+	
+	@Test
+	public void testIngestQuery() throws Exception {
+		List<Book> books = getBookList(5);
+	
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+		Jackson2JsonObjectMapper mapper = new Jackson2JsonObjectMapper(objectMapper);
+	
+		this.sink.input().send(new GenericMessage<>(mapper.toJson(books)));
+	
+		final Select select = QueryBuilder.select().all().from("book");
+	
+		assertEqualsEventually(5, new Supplier<Integer>() {
+	
+			@Override
+			public Integer get() {
+				return cassandraTemplate.select(select, Book.class).size();
+			}
+	
+		});
+	
+		this.cassandraTemplate.truncate("book");
 	}
+
+}
+	@WebIntegrationTest(randomPort = true, value = {"spring.cassandra.init-script=init-db.cql",
+	"ingest-query=update book set inStock = :inStock, author = :author, pages = :pages, saleDate = :saleDate, title = :title where isbn = :isbn",
+	"queryType=UPDATE"})
+	@Ignore("Ignoring temporarily until the CI failure root cause is resolved")
+	public static class CassandraSinkIngestUpdateTests extends CassandraSinkIntegrationTests {
+	
+	@Test
+	public void testIngestQuery() throws Exception {
+		List<Book> books = getBookList(5);
+	
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+		Jackson2JsonObjectMapper mapper = new Jackson2JsonObjectMapper(objectMapper);
+	
+		this.sink.input().send(new GenericMessage<>(mapper.toJson(books)));
+	
+		final Select select = QueryBuilder.select().all().from("book");
+	
+		assertEqualsEventually(5, new Supplier<Integer>() {
+	
+			@Override
+			public Integer get() {
+				return cassandraTemplate.select(select, Book.class).size();
+			}
+	
+		});
+	
+		this.cassandraTemplate.truncate("book");
+	}
+
+}
+	
+	
 
 	@WebIntegrationTest(randomPort = true, value = {"spring.cassandra.init-script=init-db.cql",
 			"ingest-query=insert into book (isbn, title, author, pages, saleDate, inStock) values (:myIsbn, :myTitle, :myAuthor, ?, ?, ?)"})
