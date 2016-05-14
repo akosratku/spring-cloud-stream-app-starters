@@ -27,7 +27,7 @@ public class UpdateQueryColumnNameExtractor implements ColumnNameExtractor {
 			readPairs(extractedColumns, where);
 		}
 		else {
-			throw new IllegalArgumentException("Invalid CQL insert query syntax: " + query);
+			throw new IllegalArgumentException("Invalid CQL update query syntax: " + query);
 		}
 		return extractedColumns;
 	}
